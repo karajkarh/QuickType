@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickType - Multilingual Typing Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .typing-area {
+            font-family: 'Courier New', monospace;
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+        .char-correct {
+            background-color: #10b981;
+            color: white;
+        }
+        .char-incorrect {
+            background-color: #ef4444;
+            color: white;
+        }
+        .char-current {
+            background-color: #3b82f6;
+            color: white;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        .dark .char-correct {
+            background-color: #059669;
+        }
+        .dark .char-incorrect {
+            background-color: #dc2626;
+        }
+        .dark .char-current {
+            background-color: #2563eb;
+        }
+        .progress-bar {
+            transition: width 0.3s ease;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.05); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                            <i class="fas fa-keyboard text-blue-600 mr-2"></i>
+                            QuickType
+                        </h1>
+                    </div>
+                    <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                        <i class="fas fa-moon dark:hidden"></i>
+                        <i class="fas fa-sun hidden dark:inline"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Setup Screen -->
+            <div id="setupScreen" class="fade-in">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Test Your Typing Speed</h2>
+                    <p class="text-xl text-gray-600 dark:text-gray-400">Choose your settings and start typing!</p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Duration Selection -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                <i class="fas fa-clock text-blue-600 mr-2"></i>Duration
+                            </h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="duration" value="60" class="mr-3" checked>
+                                    <span class="text-gray-700 dark:text-gray-300">1 Minute</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="duration" value="180" class="mr-3">
+                                    <span class="text-gray-700 dark:text-gray-300">3 Minutes</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="duration" value="300" class="mr-3">
+                                    <span class="text-gray-700 dark:text-gray-300">5 Minutes</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="duration" value="600" class="mr-3">
+                                    <span class="text-gray-700 dark:text-gray-300">10 Minutes</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Language Selection -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                <i class="fas fa-globe text-green-600 mr-2"></i>Language
+                            </h3>
+                            <select id="languageSelect" class="w-full p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                                <option value="english">English</option>
+                                <option value="hindi">Hindi (हिंदी)</option>
+                                <option value="spanish">Español</option>
+                                <option value="french">Français</option>
+                                <option value="marathi">Marathi (मराठी)</option>
+                            </select>
+                        </div>
+
+                        <!-- Mode Selection -->
+                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                <i class="fas fa-edit text-purple-600 mr-2"></i>Mode
+                            </h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="mode" value="paragraphs" class="mr-3" checked>
+                                    <span class="text-gray-700 dark:text-gray-300">Random Paragraphs</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="mode" value="phrases" class="mr-3">
+                                    <span class="text-gray-700 dark:text-gray-300">Short Phrases</span>
+                                </label>
+                                <label class="flex items-center p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer">
+                                    <input type="radio" name="mode" value="essays" class="mr-3">
+                                    <span class="text-gray-700 dark:text-gray-300">Long Essays</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-8">
+                        <button id="startTest" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg text-lg transition-colors duration-200 shadow-lg">
+                            <i class="fas fa-play mr-2"></i>Start Typing Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Screen -->
+            <div id="typingScreen" class="hidden">
+                <!-- Stats Bar -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                        <div class="bounce-in">
+                            <div class="text-2xl font-bold text-blue-600" id="wpmDisplay">0</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">WPM</div>
+                        </div>
+                        <div class="bounce-in" style="animation-delay: 0.1s;">
+                            <div class="text-2xl font-bold text-green-600" id="accuracyDisplay">100%</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Accuracy</div>
+                        </div>
+                        <div class="bounce-in" style="animation-delay: 0.2s;">
+                            <div class="text-2xl font-bold text-purple-600" id="charactersDisplay">0</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Characters</div>
+                        </div>
+                        <div class="bounce-in" style="animation-delay: 0.3s;">
+                            <div class="text-2xl font-bold text-red-600" id="timeDisplay">0:00</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Time Left</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div id="progressBar" class="bg-blue-600 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing Area -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 slide-up">
+                    <div id="textDisplay" class="typing-area text-lg mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg min-h-32 text-gray-800 dark:text-gray-200"></div>
+                    <textarea id="typingInput" class="w-full p-4 text-lg border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none" rows="4" placeholder="Start typing here..."></textarea>
+                </div>
+            </div>
+
+            <!-- Results Screen -->
+            <div id="resultsScreen" class="hidden">
+                <div class="text-center mb-8 fade-in">
+                    <h2 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">Test Complete!</h2>
+                    <p id="motivationalMessage" class="text-xl text-gray-600 dark:text-gray-400"></p>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-2xl mx-auto bounce-in">
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <div class="text-3xl font-bold text-blue-600" id="finalWPM">0</div>
+                            <div class="text-gray-600 dark:text-gray-400">Words Per Minute</div>
+                        </div>
+                        <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <div class="text-3xl font-bold text-green-600" id="finalAccuracy">0%</div>
+                            <div class="text-gray-600 dark:text-gray-400">Accuracy</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                            <div class="text-3xl font-bold text-purple-600" id="finalCharacters">0</div>
+                            <div class="text-gray-600 dark:text-gray-400">Characters Typed</div>
+                        </div>
+                        <div class="text-center p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                            <div class="text-3xl font-bold text-yellow-600" id="finalErrors">0</div>
+                            <div class="text-gray-600 dark:text-gray-400">Errors</div>
+                        </div>
+                    </div>
+
+                    <div class="text-center space-y-4">
+                        <button id="retakeTest" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg mr-4 transition-colors">
+                            <i class="fas fa-redo mr-2"></i>Try Again
+                        </button>
+                        <button id="newTest" class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>New Test
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Text content for different languages and modes
+        const textContent = {
+            english: {
+                paragraphs: [
+                    "The quick brown fox jumps over the lazy dog. This pangram contains all letters of the English alphabet and is commonly used for typing practice. It demonstrates various letter combinations and helps improve finger dexterity.",
+                    "Technology has revolutionized the way we communicate, work, and live. From smartphones to artificial intelligence, innovation continues to shape our future. The digital age brings both opportunities and challenges that we must navigate carefully.",
+                    "Reading books expands our knowledge and imagination. Literature takes us to different worlds, introduces us to new perspectives, and helps us understand human nature. A good book can be a lifelong companion and teacher.",
+                    "Environmental conservation is crucial for our planet's future. Climate change, pollution, and deforestation are pressing issues that require immediate attention. Every individual can contribute to making a positive difference through conscious choices.",
+                    "Education is the foundation of personal and societal growth. It empowers individuals with knowledge, critical thinking skills, and the ability to make informed decisions. Lifelong learning is essential in our rapidly changing world."
+                ],
+                phrases: [
+                    "hello world", "typing speed", "practice makes perfect", "quick brown fox", "artificial intelligence",
+                    "modern technology", "beautiful sunrise", "ocean waves", "mountain peaks", "peaceful garden",
+                    "morning coffee", "evening sunset", "starry night", "gentle breeze", "flowing river",
+                    "friendly smile", "warm embrace", "bright future", "endless possibilities", "creative thinking"
+                ],
+                essays: [
+                    "The importance of effective communication cannot be overstated in today's interconnected world. Whether in personal relationships, professional settings, or global diplomacy, the ability to convey ideas clearly and understand others is fundamental to success. Communication involves not just speaking and writing, but also listening, observing, and empathizing. In the digital age, we have more tools than ever to connect with others, yet meaningful communication seems increasingly challenging. Social media, emails, and instant messaging offer convenience but can sometimes lack the nuance and emotional depth of face-to-face interaction. Understanding cultural differences, emotional intelligence, and active listening skills are essential components of effective communication. As we navigate an increasingly complex world, those who master the art of communication will be better equipped to build relationships, solve problems, and create positive change in their communities and beyond.",
+                    "The concept of sustainable living has gained significant attention as environmental concerns continue to grow worldwide. Sustainable living involves making conscious choices that reduce our negative impact on the environment while maintaining a good quality of life. This includes practices such as reducing energy consumption, minimizing waste, choosing eco-friendly products, and supporting renewable resources. The transition to sustainable living requires both individual and collective action. Governments, businesses, and communities must work together to create systems that support environmental responsibility. Simple changes like using public transportation, growing your own vegetables, reducing plastic consumption, and choosing renewable energy sources can make a meaningful difference. Education plays a crucial role in promoting sustainable practices, as awareness leads to better decision-making. The goal is not to sacrifice comfort or progress, but to find innovative ways to live that are both fulfilling and environmentally responsible."
+                ]
+            },
+            hindi: {
+                paragraphs: [
+                    "भारत एक विविधताओं से भरा देश है। यहाँ अनेक भाषाएँ, संस्कृतियाँ और परंपराएँ एक साथ फलती-फूलती हैं। हमारी एकता हमारी विविधता में ही निहित है।",
+                    "शिक्षा मानव जीवन की आधारशिला है। यह व्यक्ति के व्यक्तित्व का विकास करती है और समाज की प्रगति में योगदान देती है। अच्छी शिक्षा से ही बेहतर भविष्य का निर्माण होता है।",
+                    "प्रकृति हमारी सबसे बड़ी संपत्ति है। पेड़-पौधे, नदियाँ, पहाड़ और जीव-जंतु सभी हमारे जीवन के लिए अत्यंत महत्वपूर्ण हैं। हमें प्रकृति का संरक्षण करना चाहिए।"
+                ],
+                phrases: [
+                    "नमस्ते", "धन्यवाद", "स्वागत है", "शुभ प्रभात", "शुभ रात्रि",
+                    "मित्रता", "प्रेम", "शांति", "खुशी", "सफलता",
+                    "विद्या", "ज्ञान", "बुद्धि", "सत्य", "न्याय"
+                ],
+                essays: [
+                    "भारतीय संस्कृति की समृद्धता और विविधता विश्व भर में प्रसिद्ध है। हमारे देश में विभिन्न धर्म, भाषा, और परंपराओं के लोग सदियों से एक साथ रहते आए हैं। यह सांस्कृतिक समन्वय भारत की सबसे बड़ी शक्ति है। हमारे त्योहार, कला, संगीत, नृत्य, और साहित्य इस समृद्ध विरासत के प्रमाण हैं। आधुनिक युग में भी हमें अपनी सांस्कृतिक मूल्यों को संजोकर रखना चाहिए और साथ ही समय के साथ आवश्यक बदलाव भी अपनाने चाहिए। युवा पीढ़ी का दायित्व है कि वे पारंपरिक मूल्यों और आधुनिक शिक्षा के बीच संतुलन बनाएं।"
+                ]
+            },
+            spanish: {
+                paragraphs: [
+                    "España es un país rico en cultura e historia. Desde las montañas del norte hasta las playas del sur, cada región tiene sus propias tradiciones y características únicas que la hacen especial.",
+                    "El idioma español es hablado por millones de personas en todo el mundo. Es una lengua hermosa y expresiva que conecta culturas y continentes diferentes.",
+                    "La tecnología moderna ha cambiado nuestra forma de vivir y trabajar. Las computadoras, los teléfonos inteligentes y el internet han revolucionado la comunicación global."
+                ],
+                phrases: [
+                    "hola mundo", "buenos días", "muchas gracias", "por favor", "de nada",
+                    "buen trabajo", "feliz cumpleaños", "buena suerte", "hasta mañana", "que tengas un buen día",
+                    "me gusta", "muy bien", "perfecto", "excelente", "fantástico"
+                ],
+                essays: [
+                    "La importancia de aprender idiomas extranjeros en el mundo globalizado de hoy no puede ser subestimada. El dominio de múltiples lenguas abre puertas a nuevas oportunidades profesionales, facilita los viajes y el intercambio cultural, y enriquece nuestra perspectiva del mundo. Cuando aprendemos un nuevo idioma, no solo adquirimos una herramienta de comunicación, sino que también nos sumergimos en una nueva forma de pensar y ver la realidad. Cada idioma tiene sus propias expresiones idiomáticas, estructuras gramaticales y referencias culturales que reflejan la manera única en que sus hablantes entienden y organizan su experiencia del mundo. En la era digital, tenemos acceso a recursos de aprendizaje más diversos y efectivos que nunca antes, desde aplicaciones móviles hasta cursos en línea y intercambios virtuales con hablantes nativos."
+                ]
+            },
+            french: {
+                paragraphs: [
+                    "La France est connue pour sa riche culture, sa gastronomie exquise et ses paysages magnifiques. De Paris à la Provence, chaque région offre des expériences uniques et mémorables.",
+                    "L'art français a influencé le monde entier pendant des siècles. Les musées, les galeries et les monuments historiques témoignent de cette tradition artistique exceptionnelle.",
+                    "La langue française est parlée sur tous les continents. Elle est considérée comme une langue de diplomatie, de culture et d'élégance dans le monde entier."
+                ],
+                phrases: [
+                    "bonjour le monde", "merci beaucoup", "s'il vous plaît", "de rien", "bonne journée",
+                    "excellent travail", "bon anniversaire", "bonne chance", "à demain", "passez un bon moment",
+                    "j'aime bien", "très bien", "parfait", "magnifique", "formidable"
+                ],
+                essays: [
+                    "L'éducation joue un rôle fondamental dans le développement de chaque individu et de la société dans son ensemble. Elle ne se limite pas à la transmission de connaissances académiques, mais englobe également le développement des compétences sociales, émotionnelles et créatives. Dans le monde moderne, où l'information est constamment en évolution, l'éducation doit préparer les étudiants à devenir des apprenants autonomes et critiques. L'école traditionnelle évolue pour intégrer les nouvelles technologies et les méthodes pédagogiques innovantes. L'objectif est de créer un environnement d'apprentissage qui stimule la curiosité, encourage la collaboration et développe l'esprit critique. Les enseignants jouent un rôle crucial en tant que guides et mentors, aidant les étudiants à découvrir leurs talents et à réaliser leur potentiel. L'éducation est un investissement dans l'avenir, tant pour l'individu que pour la société."
+                ]
+            },
+            marathi: {
+                paragraphs: [
+                    "महाराष्ट्र राज्य अपनी समृद्ध संस्कृती आणि परंपरांसाठी प्रसिद्ध आहे. येथे विविध भाषा, कला आणि संस्कृती एकत्र मिळून एक सुंदर चित्र तयार करतात.",
+                    "मराठी भाषा अतिशय मधुर आणि भावपूर्ण आहे. या भाषेत अनेक महान साहित्यकारांनी उत्कृष्ट साहित्य निर्माण केले आहे.",
+                    "शिक्षणाचे महत्त्व आपल्या जीवनात अपार आहे. चांगले शिक्षण घेतल्याने व्यक्तीचा सर्वांगीण विकास होतो आणि समाजाची प्रगती होते."
+                ],
+                phrases: [
+                    "नमस्कार", "धन्यवाद", "कृपया", "काही हरकत नाही", "शुभ दिन",
+                    "उत्तम काम", "वाढदिवसाच्या शुभेच्छा", "शुभेच्छा", "उद्या भेटू", "चांगला दिवस जावो",
+                    "मला आवडते", "खूप चांगले", "उत्तम", "छान", "अप्रतिम"
+                ],
+                essays: [
+                    "आजच्या आधुनिक युगात तंत्रज्ञानाचा वापर आपल्या दैनंदिन जीवनाचा एक महत्त्वाचा भाग बनला आहे. कॉम्प्युटर, स्मार्टफोन आणि इंटरनेट यांमुळे जगभरातील लोकांशी संपर्क साधणे सोपे झाले आहे. या तंत्रज्ञानाचा योग्य वापर केल्यास ते आपल्या शिक्षण, व्यवसाय आणि व्यक्तिगत जीवनात मोठा फायदा करू शकते. तथापि, तंत्रज्ञानाचा अतिवापर टाळणे आणि त्याचा संतुलित वापर करणे गरजेचे आहे. आपल्याला परंपरागत मूल्ये आणि आधुनिक तंत्रज्ञान यांच्यात योग्य संतुलन राखावे लागेल. भविष्यातील पिढ्यांसाठी हे तंत्रज्ञान कल्याणकारी ठरावे यासाठी आपण जबाबदारीने त्याचा वापर करावा."
+                ]
+            }
+        };
+
+        // Global variables
+        let currentTest = {
+            duration: 60,
+            language: 'english',
+            mode: 'paragraphs',
+            text: '',
+            startTime: null,
+            endTime: null,
+            timer: null,
+            currentCharIndex: 0,
+            correctChars: 0,
+            totalCharsTyped: 0,
+            errors: 0,
+            isActive: false
+        };
+
+        // Theme management
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        }
+
+        // Text generation
+        function generateText(language, mode) {
+            const texts = textContent[language][mode];
+            if (mode === 'phrases') {
+                // For phrases, combine multiple phrases
+                const selectedPhrases = [];
+                for (let i = 0; i < 10; i++) {
+                    selectedPhrases.push(texts[Math.floor(Math.random() * texts.length)]);
+                }
+                return selectedPhrases.join(' ');
+            } else {
+                // For paragraphs and essays, return a random selection
+                return texts[Math.floor(Math.random() * texts.length)];
+            }
+        }
+
+        // Display text with character highlighting
+        function displayText() {
+            const textDisplay = document.getElementById('textDisplay');
+            const text = currentTest.text;
+            const typedText = document.getElementById('typingInput').value;
+            
+            let html = '';
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                let className = '';
+                
+                if (i < typedText.length) {
+                    if (typedText[i] === char) {
+                        className = 'char-correct';
+                    } else {
+                        className = 'char-incorrect';
+                    }
+                } else if (i === typedText.length) {
+                    className = 'char-current';
+                }
+                
+                if (char === ' ') {
+                    html += `<span class="${className}">&nbsp;</span>`;
+                } else if (char === '\n') {
+                    html += '<br>';
+                } else {
+                    html += `<span class="${className}">${char}</span>`;
+                }
+            }
+            
+            textDisplay.innerHTML = html;
+            
+            // Auto-scroll to current position
+            const currentChar = textDisplay.querySelector('.char-current');
+            if (currentChar) {
+                currentChar.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }
+
+        // Calculate statistics
+        function calculateStats(typedText) {
+            const timeElapsed = (Date.now() - currentTest.startTime) / 1000 / 60; // minutes
+            const wordsTyped = typedText.trim().split(/\s+/).length;
+            const wpm = Math.round(wordsTyped / timeElapsed) || 0;
+            
+            // Fixed accuracy calculation
+            currentTest.totalCharsTyped = typedText.length;
+            currentTest.correctChars = 0;
+            currentTest.errors = 0;
+            
+            for (let i = 0; i < typedText.length && i < currentTest.text.length; i++) {
+                if (typedText[i] === currentTest.text[i]) {
+                    currentTest.correctChars++;
+                } else {
+                    currentTest.errors++;
+                }
+            }
+            
+            // Calculate accuracy - ensure it's never 0 if user has typed something
+            let accuracy = 100;
+            if (currentTest.totalCharsTyped > 0) {
+                accuracy = Math.round((currentTest.correctChars / currentTest.totalCharsTyped) * 100);
+            }
+            
+            return {
+                wpm: wpm,
+                accuracy: accuracy,
+                characters: currentTest.totalCharsTyped,
+                errors: currentTest.errors
+            };
+        }
+
+        // Update real-time stats
+        function updateStats() {
+            if (!currentTest.isActive) return;
+            
+            const typedText = document.getElementById('typingInput').value;
+            const stats = calculateStats(typedText);
+            
+            document.getElementById('wpmDisplay').textContent = stats.wpm;
+            document.getElementById('accuracyDisplay').textContent = `${stats.accuracy}%`;
+            document.getElementById('charactersDisplay').textContent = stats.characters;
+            
+            // Update progress bar
+            const progress = (typedText.length / currentTest.text.length) * 100;
+            document.getElementById('progressBar').style.width = `${Math.min(progress, 100)}%`;
+        }
+
+        // Timer functions
+        function updateTimer() {
+            if (!currentTest.isActive) return;
+            
+            const elapsed = Math.floor((Date.now() - currentTest.startTime) / 1000);
+            const remaining = currentTest.duration - elapsed;
+            
+            if (remaining <= 0) {
+                endTest();
+                return;
+            }
+            
+            const minutes = Math.floor(remaining / 60);
+            const seconds = remaining % 60;
+            document.getElementById('timeDisplay').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            currentTest.timer = setInterval(() => {
+                updateTimer();
+                updateStats();
+            }, 100);
+        }
+
+        // Test management
+        function startTest() {
+            // Get settings
+            currentTest.duration = parseInt(document.querySelector('input[name="duration"]:checked').value);
+            currentTest.language = document.getElementById('languageSelect').value;
+            currentTest.mode = document.querySelector('input[name="mode"]:checked').value;
+            
+            // Generate text
+            currentTest.text = generateText(currentTest.language, currentTest.mode);
+            
+            // Reset stats
+            currentTest.startTime = Date.now();
+            currentTest.currentCharIndex = 0;
+            currentTest.correctChars = 0;
+            currentTest.totalCharsTyped = 0;
+            currentTest.errors = 0;
+            currentTest.isActive = true;
+            
+            // Show typing screen
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('typingScreen').classList.remove('hidden');
+            
+            // Display text and focus input
+            displayText();
+            document.getElementById('typingInput').value = '';
+            document.getElementById('typingInput').focus();
+            
+            // Initialize timer display
+            const minutes = Math.floor(currentTest.duration / 60);
+            const seconds = currentTest.duration % 60;
+            document.getElementById('timeDisplay').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Start timer
+            startTimer();
+        }
+
+        function endTest() {
+            currentTest.isActive = false;
+            currentTest.endTime = Date.now();
+            
+            if (currentTest.timer) {
+                clearInterval(currentTest.timer);
+            }
+            
+            // Calculate final stats
+            const typedText = document.getElementById('typingInput').value;
+            const finalStats = calculateStats(typedText);
+            
+            // Show results
+            showResults(finalStats);
+        }
+
+        function showResults(stats) {
+            // Hide typing screen, show results
+            document.getElementById('typingScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            // Display stats
+            document.getElementById('finalWPM').textContent = stats.wpm;
+            document.getElementById('finalAccuracy').textContent = `${stats.accuracy}%`;
+            document.getElementById('finalCharacters').textContent = stats.characters;
+            document.getElementById('finalErrors').textContent = stats.errors;
+            
+            // Show motivational message
+            const messages = {
+                excellent: "Outstanding performance! You're a typing master! 🏆",
+                good: "Great job! Keep practicing to reach new heights! 🚀",
+                average: "Good work! Practice regularly to improve your speed. 💪",
+                beginner: "Nice start! Everyone begins somewhere. Keep going! 🌟"
+            };
+            
+            let messageKey = 'beginner';
+            if (stats.wpm >= 60 && stats.accuracy >= 95) messageKey = 'excellent';
+            else if (stats.wpm >= 40 && stats.accuracy >= 90) messageKey = 'good';
+            else if (stats.wpm >= 25 && stats.accuracy >= 80) messageKey = 'average';
+            
+            document.getElementById('motivationalMessage').textContent = messages[messageKey];
+        }
+
+        function resetToSetup() {
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('typingScreen').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+            
+            if (currentTest.timer) {
+                clearInterval(currentTest.timer);
+            }
+            
+            currentTest.isActive = false;
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            
+            // Theme toggle
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            
+            // Start test
+            document.getElementById('startTest').addEventListener('click', startTest);
+            
+            // Results buttons
+            document.getElementById('retakeTest').addEventListener('click', startTest);
+            document.getElementById('newTest').addEventListener('click', resetToSetup);
+            
+            // Typing input handler
+            document.getElementById('typingInput').addEventListener('input', function() {
+                if (!currentTest.isActive) return;
+                
+                displayText();
+                updateStats();
+                
+                // Check if test is complete
+                if (this.value.length >= currentTest.text.length) {
+                    endTest();
+                }
+            });
+            
+            // Prevent backspace navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && e.target !== document.getElementById('typingInput')) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Focus typing area when clicking on text display
+            document.getElementById('textDisplay').addEventListener('click', function() {
+                document.getElementById('typingInput').focus();
+            });
+        });
+    </script>
+</body>
+</html>
