@@ -1,8 +1,11 @@
 export default function PrivacyPolicy() {
   return (
-    <div style={{ padding: '2rem', maxWidth: '800px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ textAlign: 'center' }}>Privacy Policy</h1>
-
+    <div>
+      <h1>Privacy Policy</h1>
+      <p>This is our privacy policy page. Full content coming soon.</p>
+    </div>
+  );
+}
       <p>
         At <strong>Quicktypo</strong>, accessible from https://quick-typo.vercel.app, the privacy of our visitors is extremely important to us.
         This Privacy Policy document outlines the types of information we collect and how we use it.
